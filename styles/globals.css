@@ -2,10 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .nav {
+    @apply bg-gray-900 border-gray-200 px-2 sm:px-4 py-2.5;
+  }
+
+  .footer {
+    @apply m-auto h-8 bg-gray-900 text-gray-200 flex justify-around items-center;
+  }
+}
+.nav {
+  background-color: rgb(15, 21, 34);
+}
 html,
 body {
   padding: 0;
   margin: 0;
+  background-color: rgb(17, 24, 39);
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
