@@ -55,7 +55,7 @@ a {
 .tooltip .tooltiptext {
   visibility: hidden;
   width: 120px;
-  background-color: rgb(17, 24, 39);
+  background-color: rgb(20, 20, 20);
   color: rgb(182, 182, 187);
   text-align: center;
   border-radius: 6px;
@@ -75,7 +75,7 @@ a {
   margin-top: -5px;
   border-width: 5px;
   border-style: solid;
-  border-color: transparent rgb(17, 24, 39) transparent transparent;
+  border-color: transparent rgb(20, 20, 20) transparent transparent;
 }
 .tooltip:hover .tooltiptext {
   visibility: visible;
