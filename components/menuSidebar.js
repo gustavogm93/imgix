@@ -7,11 +7,11 @@ import { IoIosColorPalette } from "react-icons/io";
 import { BsMask } from "react-icons/bs";
 import { CgEditNoise } from "react-icons/cg";
 
-export default function MenuSidebar() {
+export default function MenuSidebar({ handleParent }) {
   //modifico el modificator settings
   return (
     <>
-      <div className=" w-20 max-w-20 border-dotted border-r-2 border-gray-900">
+      <div className=" w-20 max-w-20 border-dotted border-r-2 border-gray-900 h-screen">
         {" "}
         <div className="tooltip">
           <ul className="flex m-auto justify-center mt-5  py-2 cursor-pointer w-16">
@@ -20,14 +20,25 @@ export default function MenuSidebar() {
           </ul>
         </div>
         <div className="tooltip">
-          <ul className="flex m-auto justify-center mt-5 rounded-lg bg-gray-900 py-2 cursor-pointer w-16">
-            <AiOutlineRotateLeft className="text-white text-2xl" />{" "}
+          <ul
+            onClick={handleParent}
+            id="rotation"
+            className="flex m-auto justify-center mt-5 rounded-lg bg-gray-900 py-2 cursor-pointer w-16 z-10"
+          >
+            <AiOutlineRotateLeft
+              id="rotation"
+              className="text-white text-2xl"
+            />{" "}
             <span className="tooltiptext">Rotation</span>
           </ul>
         </div>
         <div className="tooltip">
-          <ul className="flex  m-auto justify-center mt-5 rounded-lg bg-gray-900 py-2 cursor-pointer w-16">
-            <BsBrightnessHigh className="text-white text-2xl" />
+          <ul
+            id="adjustment"
+            onClick={handleParent}
+            className="flex  m-auto justify-center mt-5 rounded-lg bg-gray-900 py-2 cursor-pointer w-16"
+          >
+            <BsBrightnessHigh id="adjustment" className="text-white text-2xl" />
             <span className="tooltiptext">Adjustment </span>
           </ul>
         </div>
