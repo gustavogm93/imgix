@@ -1,12 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import SliderBar from "./sliderBar";
+import { SettingsContext } from "../context/settingContext";
 
 export default function ImageSettings({ id, title, query, settings }) {
   const [active, setActive] = useState(true);
+  const {
+    actions: { handleUndo, handleRedo },
+  } = useContext(SettingsContext);
 
   const handleActiveCheckBox = (e) => {
     e.preventDefault();
     setActive(!active);
+  };
+
+  const handleButtonUndo = () => {
+    handleUndo();
+  };
+
+  const handleButtonRedo = () => {
+    handleRedo();
   };
 
   return (
@@ -23,6 +35,8 @@ export default function ImageSettings({ id, title, query, settings }) {
             {settings && settings.slider && (
               <SliderBar query={query} settings={settings} />
             )}
+            <button onClick={handleButtonUndo}>Undo</button>
+            <button onClick={handleButtonRedo}>Redo</button>
           </div>
         </details>
       </div>

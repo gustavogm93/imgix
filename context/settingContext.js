@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import { Node, DoublyLinkedList } from "./doublyLinkedList";
+import _ from "lodash";
 
 export const SettingsContext = createContext();
 
@@ -16,7 +17,7 @@ String.prototype.replaceBetween = function (start, end, str) {
 export const SettingProvider = ({ children }) => {
   const [value, setValue] = useState(0);
   const [active, setActive] = useState(false);
-  const [pointer, setPointer] = useState(new Node());
+  const [pointer, setPointer] = useState(new Node(null));
   const [listOfActions, setListOfActions] = useState(
     new DoublyLinkedList(null)
   );
@@ -32,6 +33,7 @@ export const SettingProvider = ({ children }) => {
     key: query e.g "bri"
     value {
       value: 0
+      slideRef: 
       startIndexOfUrl
       lastIndexOfUrl
     }
@@ -39,8 +41,42 @@ export const SettingProvider = ({ children }) => {
   }]
   url: "bri=50&const=20", e.g
 }*/
+  /*
+Undo Pointer = tail.prev
 
-  const handleSettings = ({ query, value }) => {
+Redo Pointer = pointer.next
+
+
+*/
+
+  const handleUndo = () => {
+    if (pointer.value || pointer.previous !== null) {
+      const newPointer = Object.assign({}, pointer);
+
+      newPointer.next = newPointer.value;
+      newPointer.value = newPointer.previous || {
+        setSlideValue: newPointer.value.setSlideValue,
+      };
+
+      const valSlide = _.get(newPointer.value, "value", 0);
+      newPointer.value.setSlideValue(valSlide);
+      setPointer(newPointer);
+    }
+  };
+
+  const handleRedo = () => {
+    if (pointer.next !== null) {
+      const newPointer = Object.assign({}, pointer);
+      newPointer.previous = newPointer.value;
+      newPointer.value = newPointer.next;
+      const query = _.get(newPointer.value, "query", "");
+      const valSlide = newPointer.value.map.get(query).value || 0;
+      newPointer.value.setSlideValue(valSlide);
+      setPointer(newPointer);
+    }
+  };
+
+  const handleSettings = ({ query, value, setSlideValue }) => {
     let _pointer;
     let _listOfActions = listOfActions; // = listOfActions ? listOfActions : new DoublyLinkedList();
 
@@ -56,7 +92,10 @@ export const SettingProvider = ({ children }) => {
       const nodeValue = {
         map: _map,
         url: urlToAppend,
+        query,
+        setSlideValue,
       };
+
       _pointer = new Node(nodeValue);
 
       const newPointer = Object.assign({}, pointer);
@@ -64,7 +103,7 @@ export const SettingProvider = ({ children }) => {
       setPointer(newPointer);
 
       const newList = Object.assign({}, listOfActions);
-      newList.head = _pointer;
+      newList.prepend(_pointer);
       setListOfActions(newList);
     } else {
       //if not exist query before
@@ -74,19 +113,30 @@ export const SettingProvider = ({ children }) => {
 
         const valuesOfMap = {
           value,
-          beginIndexOfUrl: url.length() - 1,
+          beginIndexOfUrl: url.length - 1,
           endIndexOfUrl: url.length + urlToAppend.length - 1,
         };
-        const _map = new Map(pointer.map);
-
+        const _map = pointer.value.map;
+        //mapa a partir del viejo map
         _map.set(query, valuesOfMap);
         const nodeValue = {
           map: _map,
           url: `${url}${query}=${value}&`,
+          query,
+          setSlideValue,
         };
+        //deberia tener el mapa completo con lo nuevo y viejo
         _pointer = new Node(nodeValue);
 
-        setPointer(_pointer);
+        pointer.next = _pointer;
+        _pointer.previous = pointer;
+
+        const newPointer = Object.assign({}, pointer);
+        newPointer.value = nodeValue;
+        newPointer.previous = pointer;
+
+        setPointer(newPointer);
+
         _listOfActions.insert(_pointer);
         setListOfActions(_listOfActions);
       } else {
@@ -109,6 +159,8 @@ export const SettingProvider = ({ children }) => {
         const nodeValue = {
           map: _map,
           url: _url,
+          query,
+          setSlideValue,
         };
         _pointer = new Node(nodeValue);
 
@@ -121,38 +173,23 @@ export const SettingProvider = ({ children }) => {
 
         setPointer(newPointer);
 
+        listOfActions.insert(_pointer);
+
         let newList1 = Object.assign({}, listOfActions);
         newList1.insert(newPointer);
         setListOfActions(newList1);
         console.log("a");
       }
     }
-    console.log(`${baseUrl}${pointer.url}`);
-    setUrl(`${baseUrl}${pointer.url}`);
   };
 
-  /*
   useEffect(() => {
-    if (!query === 0) {
-      return;
-    }
+    const _url = _.get(pointer.value, "url", "");
 
-    let urlReplaced = url;
-    console.log(value, active, "aver");
-    console.log(urlReplaced, "urlReplaced1");
+    console.log(`${baseUrl}${_url}`);
+    setUrl(`${baseUrl}${_url}`);
+  }, [pointer]);
 
-    if (!active) {
-      urlReplaced.replace(`${query}=${value}&`, "");
-      setUrl(urlReplaced);
-      return;
-    }
-
-    urlReplaced = `${urlReplaced}${query}=${value}&`;
-    console.log(urlReplaced, "urlReplaced3");
-    setUrl(urlReplaced);
-    console.log(url, "final url");
-  }, [value, active, query]);
- */
   const handleUrl = (urlAppend) => {
     const newUrl = url;
     setUrl(url);
@@ -167,6 +204,8 @@ export const SettingProvider = ({ children }) => {
   const actions = {
     handleSettings,
     handleUrl,
+    handleUndo,
+    handleRedo,
   };
 
   return (

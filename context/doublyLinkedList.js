@@ -17,7 +17,7 @@ export class DoublyLinkedList {
     this.tail = this.head;
   }
 
-  printList() {
+  printList = () => {
     let array = [];
     let currentList = this.head;
     while (currentList !== null) {
@@ -26,10 +26,10 @@ export class DoublyLinkedList {
     }
 
     return this;
-  }
+  };
 
   // Insert node at end of the list
-  append(value) {
+  append = (value) => {
     let newNode = new Node(value);
 
     this.tail.next = newNode;
@@ -38,10 +38,10 @@ export class DoublyLinkedList {
 
     this.length++;
     this.printList();
-  }
+  };
 
   // Insert node at the start of the list
-  prepend(value) {
+  prepend = (value) => {
     let newNode = new Node(value);
 
     newNode.next = this.head;
@@ -50,10 +50,10 @@ export class DoublyLinkedList {
 
     this.length++;
     this.printList();
-  }
+  };
 
   // Insert node at a given index
-  insert(index, value) {
+  insert = (index, value) => {
     if (!Number.isInteger(index) || index < 0 || index > this.length + 1) {
       console.log(`Invalid index. Current length is ${this.length}.`);
       return this;
@@ -88,7 +88,7 @@ export class DoublyLinkedList {
 
     this.length++;
     this.printList();
-  }
+  };
 
   // Remove a node
   remove(index) {

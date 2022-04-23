@@ -1,38 +1,41 @@
 import Slider, { Range } from "rc-slider";
 //import use state
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import "rc-slider/assets/index.css";
 import { SettingsContext } from "../context/settingContext";
 
 export default function SliderBar({ query, settings }) {
   const { min, max, initialValue, type } = settings.slider;
-  const [val, setValue] = useState(initialValue);
+  const [slideValue, setSlideValue] = useState(initialValue);
+  const slideRef = useRef(null);
   const {
     actions: { handleSettings },
   } = useContext(SettingsContext);
   const HandleValue = (value) => {
-    setValue(value);
+    setSlideValue(value);
   };
 
   const HandleValue2 = (value) => {
-    setValue(value);
-    handleSettings({ query, value });
+    setSlideValue(value);
+    console.log(slideRef);
+    handleSettings({ query, value, setSlideValue });
   };
 
   useEffect(() => {
-    setValue(initialValue);
+    setSlideValue(initialValue);
   }, []);
 
   return (
     <div>
       <div>
-        {val}
+        {slideValue}
         {type}
       </div>
       <Slider
+        ref={slideRef}
         color="red"
         inverted={false}
-        value={val}
+        value={slideValue}
         startPoint={initialValue}
         start={initialValue}
         min={min}
