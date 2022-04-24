@@ -4,12 +4,6 @@ import _ from "lodash";
 
 export const SettingsContext = createContext();
 
-/*
-setting {
-    value: 0
-    active: false
-}*/
-
 String.prototype.replaceBetween = function (start, end, str) {
   return this.substring(0, start) + str + this.substring(end);
 };
@@ -27,48 +21,81 @@ export const SettingProvider = ({ children }) => {
   const [baseUrl, setBaseUrl] = useState(
     "https://assets.imgix.net/unsplash/bear.jpg?"
   );
-  /*{
-
-  mapValues: [{
-    key: query e.g "bri"
-    value {
-      value: 0
-      slideRef: 
-      startIndexOfUrl
-      lastIndexOfUrl
-    }
-
-  }]
-  url: "bri=50&const=20", e.g
-}*/
-  /*
-Undo Pointer = tail.prev
-
-Redo Pointer = pointer.next
-
-
-*/
 
   const handleUndo = () => {
     if (pointer.value || pointer.previous !== null) {
       const newPointer = Object.assign({}, pointer);
+      /*
 
-      newPointer.next = newPointer.value;
-      newPointer.value = newPointer.previous || {
-        setSlideValue: newPointer.value.setSlideValue,
-      };
+    add bri50
+    add con50
 
-      const valSlide = _.get(newPointer.value, "value", 0);
-      newPointer.value.setSlideValue(valSlide);
+    undo -> bri50 pointer.value = bri50 next: bri50, con50
+
+    undo -> value: null next bri50 next.next bri50.con50
+
+
+      //next sea el actual bri50 con50 -----
+      newPointer.next = newPointer;
+
+      //el actual sea el previous
+      newPointer.value = _.get(newPointer, "previous", null);
+
+      //el previous sea el previous previous
+      newPointer.previous = _.get(newPointer.previous, "previous", null);
+
+
+
+*/
+      //next sea el actual bri50 con50 -----
+      const tempNext = newPointer.next;
+      const tempPrev = newPointer.previous;
+      newPointer.next = new Node(newPointer.value);
+      newPointer.next.next = tempNext;
+      newPointer.next.previous = tempPrev;
+
+      //el actual sea el previous
+      newPointer.value = _.get(newPointer, "previous.value", null);
+      newPointer.previous = _.get(newPointer, "previous.previous", null);
+
+      newPointer.next.previous = newPointer;
+
+      //update query
+      const query = _.get(newPointer.next, "value.query", null);
+
+      //DEL CURRENT DEBERIA BUSJCAR LA QUERY. SI NO EXISTE ENTONCES PONEMOS 0 SI NO EL VALOR DEL ACTUAL
+      const map = _.get(newPointer.value, "map", null);
+      let val;
+      if (!map) {
+        val = 0;
+      } else {
+        const registry = newPointer.value.map.get(query);
+        val = registry ? registry.value : 0;
+      }
+      newPointer.next.value.setSlideValue(val);
       setPointer(newPointer);
+      /*
+      const map = _.get(newPointer.value, "map", null);
+      let val;
+      if (!map) {
+        val = 0;
+      } else {
+        const registry = newPointer.value.map.get(query);
+        val = registry ? registry.value : 0;
+      }
+      
+      newPointer.next.value.setSlideValue(val);
+      */
     }
   };
 
   const handleRedo = () => {
     if (pointer.next !== null) {
       const newPointer = Object.assign({}, pointer);
-      newPointer.previous = newPointer.value;
-      newPointer.value = newPointer.next;
+
+      //el valor nuevo actual es el next
+      newPointer = newPointer.next;
+
       const query = _.get(newPointer.value, "query", "");
       const valSlide = newPointer.value.map.get(query).value || 0;
       newPointer.value.setSlideValue(valSlide);
@@ -93,6 +120,7 @@ Redo Pointer = pointer.next
         map: _map,
         url: urlToAppend,
         query,
+        slideValue: value,
         setSlideValue,
       };
 
@@ -100,6 +128,7 @@ Redo Pointer = pointer.next
 
       const newPointer = Object.assign({}, pointer);
       newPointer.value = nodeValue;
+      newPointer.next = null;
       setPointer(newPointer);
 
       const newList = Object.assign({}, listOfActions);
@@ -116,13 +145,14 @@ Redo Pointer = pointer.next
           beginIndexOfUrl: url.length - 1,
           endIndexOfUrl: url.length + urlToAppend.length - 1,
         };
-        const _map = pointer.value.map;
+        const _map = new Map(pointer.value.map);
         //mapa a partir del viejo map
         _map.set(query, valuesOfMap);
         const nodeValue = {
           map: _map,
           url: `${url}${query}=${value}&`,
           query,
+          slideValue: value,
           setSlideValue,
         };
         //deberia tener el mapa completo con lo nuevo y viejo
@@ -130,12 +160,13 @@ Redo Pointer = pointer.next
 
         pointer.next = _pointer;
         _pointer.previous = pointer;
-
+        /*
         const newPointer = Object.assign({}, pointer);
         newPointer.value = nodeValue;
         newPointer.previous = pointer;
-
-        setPointer(newPointer);
+        */
+        _pointer.next = null;
+        setPointer(_pointer);
 
         _listOfActions.insert(_pointer);
         setListOfActions(_listOfActions);
@@ -147,7 +178,7 @@ Redo Pointer = pointer.next
           beginIndexOfUrl: pointer.value.map.get(query).beginIndexOfUrl,
           endIndexOfUrl: pointer.value.map.get(query).endIndexOfUrl,
         };
-        const _map = pointer.value.map;
+        const _map = new Map(pointer.value.map);
 
         _map.set(query, valuesOfMap);
         const _url = pointerUrl.replaceBetween(
@@ -160,6 +191,7 @@ Redo Pointer = pointer.next
           map: _map,
           url: _url,
           query,
+          slideValue: value,
           setSlideValue,
         };
         _pointer = new Node(nodeValue);
@@ -171,6 +203,7 @@ Redo Pointer = pointer.next
         newPointer.value = nodeValue;
         newPointer.previous = pointer;
 
+        newPointer.next = null;
         setPointer(newPointer);
 
         listOfActions.insert(_pointer);
@@ -178,7 +211,6 @@ Redo Pointer = pointer.next
         let newList1 = Object.assign({}, listOfActions);
         newList1.insert(newPointer);
         setListOfActions(newList1);
-        console.log("a");
       }
     }
   };
@@ -199,6 +231,8 @@ Redo Pointer = pointer.next
     query,
     value,
     active,
+    url,
+    baseUrl,
   };
 
   const actions = {
